@@ -1,13 +1,13 @@
 <?php
 
-function diferença ($x,$y){
-    $diferença = $x - $y;
-    return $diferença;
+function diferenca ($x,$y){
+    $diferenca = $x - $y;
+    return $diferenca;
 }
 
 
 $num1 = 20;
 $num2 = 14;
 
-echo diferença ($num1,$num2);
+echo diferenca ($num1,$num2);
 ?>

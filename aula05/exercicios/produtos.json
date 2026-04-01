@@ -1,0 +1,22 @@
+[
+    {
+        "produto": "Batom",
+        "Preco": 20,
+        "Quantidade": 15
+    },
+    {
+        "produto": "Delineador",
+        "Preco": 12,
+        "Quantidade": 8
+    },
+    {
+        "produto": "Sombra",
+        "Preco": 15,
+        "Quantidade": 15
+    },
+    {
+        "produto": "Blush",
+        "Preco": 17,
+        "Quantidade": 20
+    }
+]

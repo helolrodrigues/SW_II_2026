@@ -1,6 +1,6 @@
 <?php
 //CABECALHO
-header("Content-Type: application/json"); //Define o tipo de resposta
+header("Content-Type: application/json; charset=UTF-8"); //Define o tipo de resposta
 
 $metodo = $_SERVER['REQUEST_METHOD'];
 //echo "Método da requisição: " . $metodo;
@@ -10,10 +10,11 @@ $arquivo = 'usuarios.json';
 
 // VERIFICA SE O ARQUIVO EXISTE, SE NÃO CRIA UM COM ARRAY VAZIO
 if (!file_exists($arquivo)) {
-    file_put_contents($arquivo, json_encode([], JSON_PRETTY_PRINT JSON_UNESCAPED_UNICODE));
+    file_put_contents($arquivo, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
-//lE O CONTEUDO DO ARQUIVO EXITE
+//
+// LE O CONTEUDO DO ARQUIVO EXITE
 $usuarios = json_decode(file_get_contents($arquivo), true);
 
 //CONTEÚDO 
@@ -25,26 +26,76 @@ $usuarios = json_decode(file_get_contents($arquivo), true);
 
 switch ($metodo) {
     case 'GET':
-        //echo "AQUI AÇÕES DO MÉTODO GET";
-        // Converte para JSON e retorna
-        echo json_encode($usuarios, JSON_PRETTY_PRINT JSON_UNESCAPED_UNICODE);
-        break;
-    case 'POST':
-        //echo "AQUI AÇÕES DO MÉTODO POST";
-        $dados = json_decode(file_get_contents('php://input'),true);
-        //print_r($dados);
-        $novoUsuario = [
-            "id" => $dados["id"],
-            "nome" => $dados["nome"],
-            "email" => $dados["email"]
-        ];
+    //Verifica se há um parametro "Id" na URL
+    if (issets($_GET['id']){
+        $id = intval($_GET['id']);
+        $usuario_encontrado = null;
 
-        // Adiciona o novo usuário ao array existente
-        aray_push($usuarios, $novoUsuario);
-        echo json_encode('Usuário inserido com sucesso!');
-        print_r($usuarios);
-
+        //Procura o usuário pelo ID
+        foreach ($usuario as $usuario){
+            if($usuario['id'] -- $id){
+                $usuario_encontrado -$usuario;
+                break;
+            }
+        }
+        if($usuario_encontrado){
+            echo json_encode($usuario_encontrado,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        }else{
+            http_response_code(404);
+            echo json_encode(["erro" => "Usuário não encontrado."], JSON_UNESCAPED_UNICODE);
+        }else{
+            //Retorna todos os usuários
+            echo json_encode($usuarios,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        }
         break;
+        case 'POST':
+            $dados = json_decode(file_get_contents('php://input'), true);
+
+            //VERIFICA CAMPOS OBRIGATÓROS (sem exigir o ID)
+            if (!issets($dados["nome"]) || !isset($dados["email"])){
+                http_response_code(400);
+                echo_json_encode(["erro" => "Nome e email são obrigatórios."], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            //GERA UM NOVO ID ÚNICO
+            $novo_id = 1;
+            if(!empty($usuarios)){
+                $ids = array_column($usuarios, 'id');
+                $novo_id = max($ids) + 1;
+            }
+
+            $novo_usuario = [
+                "id" => $novo_id,
+                "nome" => $dados ["nome"],
+                "email" => $dados ["email"],
+            ];
+            //ADICIONA O NOVO USUÁRIO 
+            $usuarios[] = $novo_usuario;
+
+            //SALVA NO ARQUIVO
+            file_put_contents($arquivo,json_encode($usuarios,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+            //RETORNA CONFIGURAÇÃO
+
+            echo json_encode([
+                "mensagem" => "Usuário inserido com sucesso!",
+                "usuario" => $novo_usuario
+            ], JSON_UNESCAPED_UNICODE);
+            break;
+            default:
+            //echo "MÉTODO NÃO ENCONTRADO!";
+            //break;
+            http_response_code(405);//método não permitido
+            echo json_encode(["erro" => "Método não permitido!"], JSON_UNESCAPED_UNICODE);
+            break;
+}
+?>
+    
+
+
+
+
+
     default:
         echo "MÉTODO NÃO ENCONTRADO!";
         break;
